@@ -12,6 +12,7 @@ var request = require('request'); // "Request" library
 var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 
 var client_id = 'a3aa8fdb1b4446fe9ad5df68e3a77fb9'; // Your client id
 var client_secret = '0d9964398b534e909eef74c6f8590263'; // Your secret
@@ -38,7 +39,8 @@ var app = express();
 
 app.use(express.static(__dirname + '/public'))
    .use(cors())
-   .use(cookieParser());
+   .use(cookieParser())
+   .use(bodyParser.json());
 
 app.get('/login', function(req, res) {
 
@@ -142,6 +144,13 @@ app.get('/refresh_token', function(req, res) {
       });
     }
   });
+});
+
+/******** Slack API ******/
+
+app.post('/jukebot', (req, res) => {
+    console.log(req.body);
+    res.status(200).send(req.body.challenge)
 });
 
 console.log('Listening');
