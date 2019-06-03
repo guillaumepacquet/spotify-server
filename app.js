@@ -16,10 +16,12 @@ var bodyParser = require('body-parser');
 
 var client_id = 'a3aa8fdb1b4446fe9ad5df68e3a77fb9'; // Your client id
 var client_secret = '0d9964398b534e909eef74c6f8590263'; // Your secret
-var redirect_uri = 'https://fast-wave-59263.herokuapp.com/callback'; // Your redirect uri
+var redirect_uri = 'https://15aa6a7c.ngrok.io/callback'; // Your redirect uri
 
 var bot_token = 'xoxb-9807265825-652578540292-SIJD9LF9FhkqxgqeVAtskigf';
 var slack_acces_token = 'xoxp-9807265825-415390763814-653093778416-1fee1436553239b23141fdfe42da6cec';
+
+var access_token = '';
 
 /**
  * Generates a random string containing numbers and letters
@@ -43,6 +45,7 @@ var app = express();
 app.use(express.static(__dirname + '/public'))
    .use(cors())
    .use(cookieParser())
+   .use(bodyParser.urlencoded({ extended: true}))
    .use(bodyParser.json());
 
 app.get('/login', function(req, res) {
@@ -94,7 +97,7 @@ app.get('/callback', function(req, res) {
     request.post(authOptions, function(error, response, body) {
       if (!error && response.statusCode === 200) {
 
-        var access_token = body.access_token,
+        access_token = body.access_token,
             refresh_token = body.refresh_token;
 
         var options = {
@@ -152,39 +155,60 @@ app.get('/refresh_token', function(req, res) {
 /******** Slack API ******/
 
 app.post('/jukebot', (req, res) => {
+    console.log('/jukebot request');
     let payload = req.body;
+    if (req.body.challenge) {
+        console.log('slack challeng check');
+        res.status(200).send(req.body.challenge);
+    }
     res.sendStatus(200);
 
     if (payload.event.type === "app_mention") {
+        console.log('app mention');
         var authOptions = {
           url: 'https://slack.com/api/chat.postMessage',
-          headers: { 'Authorization': 'Bearer ' + payload.token },
-          form: {
-            channel: payload.event.channel,
-            text: 'I\'m sorry I don\'t understand English'
+          headers: {
+              'Authorization': 'Bearer ' + bot_token,
+              'Content-type': 'application/json'
           },
+          form: {
+            channel: 'jukebox',
+            as_user: 'jukebot',
+            text: 'hello world'
+        },
           json: true
         };
 
-        if (payload.event.text.includes("help")) {
-            authOptions.text = 'Help comming soon';
-            request.post(authOptions, (error, response, body) => {
-                if (error) {
-                    console.log(error);
-                }
-            });
-        } else {
-            request.post(authOptions, (error, response, body) => {
-                if (error) {
-                    console.log(error);
-                }
-            });
-        }
+        request.post(authOptions, function(err, resp, body) {
+            console.log(err);
+            console.log(resp.statusCode);
+            console.log(body);
+        });
     }
+});
 
+app.post('/find', (req, res) => {
+    console.log('/find request');
+    let payload = req.body;
+    console.log(payload);
+    var options = {
+      url: 'https://api.spotify.com/v1/search',
+      headers: { 'Authorization': 'Bearer ' + access_token },
+      qs: {
+          q: payload.text,
+          type: 'track',
+          limit: 5
+      },
+      json: true
+    };
+    console.log(options);
 
-    console.log(req.body);
-    res.status(200).send(req.body.challenge)
+    // use the access token to access the Spotify Web API
+    request.get(options, function(error, response, body) {
+      console.log(body);
+    });
+
+    res.sendStatus(200);
 });
 
 console.log('Listening');
