@@ -1,7 +1,7 @@
 let request = require('request');
 
-let bot_token = 'xoxb-9807265825-652578540292-SIJD9LF9FhkqxgqeVAtskigf';
-let slack_acces_token = 'xoxp-9807265825-415390763814-653093778416-1fee1436553239b23141fdfe42da6cec';
+let bot_token = '';
+let slack_acces_token = '';
 
 exports.jukebot =  async (req, res) => {
     console.log('/jukebot request');
