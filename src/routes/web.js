@@ -4,8 +4,8 @@ var querystring = require('querystring');
 const Store = require('data-store');
 const store = new Store({ path: 'db.json' });
 
-var client_id = ''; // Your client id
-var client_secret = ''; // Your secret
+var client_id = 'a3aa8fdb1b4446fe9ad5df68e3a77fb9'; // Your client id
+var client_secret = '0d9964398b534e909eef74c6f8590263'; // Your secret
 var redirect_uri = 'https://sortify-jukebox.herokuapp.com/callback'; // Your redirect uri
 var access_token = '';
 
@@ -142,6 +142,8 @@ exports.refresh = function(req, res) {
     if (!error && response.statusCode === 200) {
       var access_token = body.access_token;
       store.set('access_token', body.access_token);
+      let tokenExpireDate = new Date().getTime() + (body.expires_in * 1000);
+      store.set('expires_at', tokenExpireDate);
       res.send({
         'access_token': access_token
       });
