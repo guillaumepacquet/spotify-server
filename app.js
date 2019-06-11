@@ -15,7 +15,13 @@ app.use(express.static(__dirname + '/public'))
    .use(bodyParser.urlencoded({ extended: true}))
    .use(bodyParser.json());
 
-app.get('/login', web.login);
+app.get('/', function (req, res, next) {
+    res.sendfile('./public/index.html')
+})
+app.get('/login', function (req, res, next) {
+    res.sendfile('./public/index.html')
+})
+app.get('/spotify-login', web.login);
 app.get('/callback', web.callback);
 app.get('/refresh_token', web.refresh);
 app.post('/jukebot', bot.jukebot);

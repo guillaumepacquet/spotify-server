@@ -4,8 +4,8 @@ var querystring = require('querystring');
 const Store = require('data-store');
 const store = new Store({ path: 'db.json' });
 
-var client_id = 'a3aa8fdb1b4446fe9ad5df68e3a77fb9'; // Your client id
-var client_secret = '0d9964398b534e909eef74c6f8590263'; // Your secret
+var client_id = process.env.SPOTIFY_APP_ID; // Your client id
+var client_secret = process.env.SPOTIFY_APP_SECRET; // Your secret
 var redirect_uri = 'https://sortify-jukebox.herokuapp.com/callback'; // Your redirect uri
 var access_token = '';
 
