@@ -1,12 +1,15 @@
-var request = require('request'); // "Request" library
-var querystring = require('querystring');
+const request = require('request'); // "Request" library
+const querystring = require('querystring');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const Store = require('data-store');
 const store = new Store({ path: 'db.json' });
 
-var client_id = process.env.SPOTIFY_APP_ID; // Your client id
-var client_secret = process.env.SPOTIFY_APP_SECRET; // Your secret
-var redirect_uri = 'https://sortify-jukebox.herokuapp.com/callback'; // Your redirect uri
+const client_id = process.env.SPOTIFY_APP_ID; // Your client id
+const client_secret = process.env.SPOTIFY_APP_SECRET; // Your secret
+const app_secret = process.env.APP_SECRET;
+const redirect_uri = 'https://sortify-jukebox.herokuapp.com/callback'; // Your redirect uri
 var access_token = '';
 
 /**
@@ -26,7 +29,32 @@ var generateRandomString = function(length) {
 
 var stateKey = 'spotify_auth_state';
 
+exports.register = function(req, res) {
+    let user = store.get('user_username');
+
+    if (user) {
+        return res.status(500).send('No more user');
+    }
+    store.set('user_password', bcrypt.hashSync(req.body.password, 8));
+    store.set('user_username', req.body.username);
+    let token = jwt.sign({ id: req.body.username }, app_secret, { expiresIn: 86400 }); // expires in 24 hours
+
+    res.status(200).send({ auth: true, token: token, user: req.body.username });
+};
+
 exports.login = function(req, res) {
+    let password = store.get('user_password');
+    let user = store.get('user_username');
+    if (user !== req.body.username) return res.status(404).send('No user found.');
+
+    let passwordIsValid = bcrypt.compareSync(req.body.password, password);
+    if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
+    let token = jwt.sign({ id: user }, app_secret, { expiresIn: 86400 }); // expires in 24 hours
+
+    res.status(200).send({ auth: true, token: token, user: user });
+};
+
+exports.loginSpotify = function(req, res) {
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
 

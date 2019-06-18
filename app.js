@@ -15,13 +15,27 @@ app.use(express.static(__dirname + '/public'))
    .use(bodyParser.urlencoded({ extended: true}))
    .use(bodyParser.json());
 
+const allowCrossDomain = function(req, res, next) {
+   res.header('Access-Control-Allow-Origin', '*');
+   res.header('Access-Control-Allow-Methods', '*');
+   res.header('Access-Control-Allow-Headers', '*');
+   next();
+}
+
+app.use(allowCrossDomain)
+
 app.get('/', function (req, res, next) {
-    res.sendfile('./public/index.html')
+    res.sendFile(__dirname + '/public/index.html');
 })
 app.get('/login', function (req, res, next) {
-    res.sendfile('./public/index.html')
+    res.sendFile(__dirname + '/public/index.html');
 })
-app.get('/spotify-login', web.login);
+app.get('/register', function (req, res, next) {
+    res.sendFile(__dirname + '/public/index.html');
+})
+app.post('/api/login', web.login);
+app.post('/api/register', web.register);
+app.get('/spotify-login', web.loginSpotify);
 app.get('/callback', web.callback);
 app.get('/refresh_token', web.refresh);
 app.post('/jukebot', bot.jukebot);

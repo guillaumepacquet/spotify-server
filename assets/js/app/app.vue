@@ -1,5 +1,5 @@
 <template>
-    <v-app id="inspire">
+    <v-app id="spotify-server">
         <router-view />
     </v-app>
 </template>
